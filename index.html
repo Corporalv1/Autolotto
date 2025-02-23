@@ -4,36 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Autolotto - Powerball Checker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input { padding: 10px; width: 80%; max-width: 300px; }
-        button { padding: 10px 20px; margin-top: 10px; }
-        #result, #ad { margin-top: 20px; font-size: 18px; }
-        #ad { color: gray; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            margin: 0;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        p {
+            color: #34495e;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 15px;
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            font-size: 1.2em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #2980b9;
+        }
+        button {
+            padding: 12px 30px;
+            margin-top: 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #result {
+            margin-top: 25px;
+            font-size: 1.5em;
+            color: #27ae60;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #ad {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
-    <h1>Autolotto - Powerball</h1>
-    <p>Enter your 6 numbers (1-69 for 5 white balls, 1-26 for Powerball, separated by spaces):</p>
-    <input type="text" id="userNumbers" placeholder="e.g., 7 18 22 50 65 15">
-    <br>
-    <button onclick="checkNumbers()">Check My Numbers</button>
-    <div id="result">Results will show here</div>
-    <div id="ad">Ad Space</div>
+    <div class="container">
+        <h1>Autolotto - Powerball</h1>
+        <p>Enter 5 white balls (1-69) + 1 Powerball (1-26), separated by spaces:</p>
+        <input type="text" id="userNumbers" placeholder="e.g., 7 18 22 50 65 15">
+        <br>
+        <button onclick="checkNumbers()">Check My Numbers</button>
+        <div id="result">Results will show here</div>
+        <div id="ad">Ad Space</div>
+    </div>
 
     <script>
         let winningNumbers = [3, 15, 27, 32, 41, 48]; // Fallback
         let powerballNumber = 7;
+        let drawDate = "Unknown";
 
-        // Fetch latest Powerball numbers
         fetch('https://www.powerball.com/api/v1/numbers/powerball/recent10?_format=json')
             .then(response => response.json())
             .then(data => {
-                const latestDraw = data[0]; // First entry is the most recent
+                const latestDraw = data[0];
                 const numbers = latestDraw.field_winning_numbers.split('-').map(Number);
-                winningNumbers = numbers.slice(0, 5); // First 5 are white balls
-                powerballNumber = numbers[5]; // Last is Powerball
-                console.log(`Latest Powerball: ${winningNumbers} + ${powerballNumber}`);
+                winningNumbers = numbers.slice(0, 5);
+                powerballNumber = numbers[5];
+                drawDate = latestDraw.field_draw_date.split('T')[0];
+                console.log(`Latest Powerball: ${winningNumbers} + ${powerballNumber} (Date: ${drawDate})`);
             })
             .catch(() => {
                 console.log("Fetch failed, using fallback numbers");
@@ -43,7 +116,6 @@
             const input = document.getElementById("userNumbers").value.trim();
             const userNumbers = input.split(" ").map(Number);
 
-            // Validate: 6 numbers, 5 white (1-69), 1 Powerball (1-26)
             if (input === "" || userNumbers.length !== 6 || 
                 userNumbers.slice(0, 5).some(n => !Number.isInteger(n) || n < 1 || n > 69) ||
                 userNumbers[5] < 1 || userNumbers[5] > 26) {
@@ -58,7 +130,7 @@
             if (powerballMatch) resultText += " + Powerball!";
             if (whiteMatches === 5 && powerballMatch) resultText = "JACKPOT! All 5 + Powerball!";
             else if (whiteMatches < 3 && !powerballMatch) resultText += ". Better luck next time!";
-            document.getElementById("result").innerText = resultText;
+            document.getElementById("result").innerText = `${resultText} (Draw: ${drawDate})`;
 
             document.getElementById("ad").innerText = "Ad: Buy more tickets at LottoMart!";
         }
