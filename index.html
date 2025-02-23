@@ -22,35 +22,30 @@
     <div id="ad">Ad Space</div>
 
     <script>
-        // Hardcoded winning numbers for now
-        const winningNumbers = [3, 15, 27, 32, 41, 48];
-        const bonusNumber = 7;
+    const winningNumbers = [3, 15, 27, 32, 41, 48];
+    const bonusNumber = 7;
 
-        function checkNumbers() {
-            // Get user input and split into array
-            const input = document.getElementById("userNumbers").value.trim();
-            const userNumbers = input.split(" ").map(Number);
+    function checkNumbers() {
+        const input = document.getElementById("userNumbers").value.trim();
+        const userNumbers = input.split(" ").map(Number);
 
-            // Basic validation
-            if (userNumbers.length !== 6 || userNumbers.some(n => n < 1 || n > 49 || isNaN(n))) {
-                document.getElementById("result").innerText = "Please enter exactly 6 numbers between 1 and 49.";
-                return;
-            }
-
-            // Count matches
-            const matches = userNumbers.filter(num => winningNumbers.includes(num)).length;
-            const bonusMatch = userNumbers.includes(bonusNumber);
-
-            // Show result
-            let resultText = `You matched ${matches} numbers`;
-            if (matches === 6) resultText = "JACKPOT! All 6 numbers!";
-            else if (matches === 5 && bonusMatch) resultText += " + bonus!";
-            else if (matches < 3) resultText += ". Better luck next time!";
-            document.getElementById("result").innerText = resultText;
-
-            // Show ad
-            document.getElementById("ad").innerText = "Ad: Buy more tickets at LottoMart!";
+        // Check for valid input
+        if (input === "" || userNumbers.length !== 6 || userNumbers.some(n => !Number.isInteger(n) || n < 1 || n > 49)) {
+            document.getElementById("result").innerText = "Enter exactly 6 numbers (1-49), separated by spaces!";
+            return;
         }
-    </script>
+
+        const matches = userNumbers.filter(num => winningNumbers.includes(num)).length;
+        const bonusMatch = userNumbers.includes(bonusNumber);
+
+        let resultText = `You matched ${matches} numbers`;
+        if (matches === 6) resultText = "JACKPOT! All 6 numbers!";
+        else if (matches === 5 && bonusMatch) resultText += " + bonus!";
+        else if (matches < 3) resultText += ". Better luck next time!";
+        document.getElementById("result").innerText = resultText;
+
+        document.getElementById("ad").innerText = "Ad: Buy more tickets at LottoMart!";
+    }
+</script>
 </body>
 </html>
