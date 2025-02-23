@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LottoCheck</title>
+    <title>Autolotto - Powerball Checker</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
         input { padding: 10px; width: 80%; max-width: 300px; }
@@ -13,39 +13,55 @@
     </style>
 </head>
 <body>
-    <h1>LottoCheck</h1>
-    <p>Enter your 6 numbers (1-49, separated by spaces):</p>
-    <input type="text" id="userNumbers" placeholder="e.g., 3 15 27 32 41 48">
+    <h1>Autolotto - Powerball</h1>
+    <p>Enter your 6 numbers (1-69 for 5 white balls, 1-26 for Powerball, separated by spaces):</p>
+    <input type="text" id="userNumbers" placeholder="e.g., 7 18 22 50 65 15">
     <br>
     <button onclick="checkNumbers()">Check My Numbers</button>
     <div id="result">Results will show here</div>
     <div id="ad">Ad Space</div>
 
     <script>
-    const winningNumbers = [3, 15, 27, 32, 41, 48];
-    const bonusNumber = 7;
+        let winningNumbers = [3, 15, 27, 32, 41, 48]; // Fallback
+        let powerballNumber = 7;
 
-    function checkNumbers() {
-        const input = document.getElementById("userNumbers").value.trim();
-        const userNumbers = input.split(" ").map(Number);
+        // Fetch latest Powerball numbers
+        fetch('https://www.powerball.com/api/v1/numbers/powerball/recent10?_format=json')
+            .then(response => response.json())
+            .then(data => {
+                const latestDraw = data[0]; // First entry is the most recent
+                const numbers = latestDraw.field_winning_numbers.split('-').map(Number);
+                winningNumbers = numbers.slice(0, 5); // First 5 are white balls
+                powerballNumber = numbers[5]; // Last is Powerball
+                console.log(`Latest Powerball: ${winningNumbers} + ${powerballNumber}`);
+            })
+            .catch(() => {
+                console.log("Fetch failed, using fallback numbers");
+            });
 
-        // Check for valid input
-        if (input === "" || userNumbers.length !== 6 || userNumbers.some(n => !Number.isInteger(n) || n < 1 || n > 49)) {
-            document.getElementById("result").innerText = "Enter exactly 6 numbers (1-49), separated by spaces!";
-            return;
+        function checkNumbers() {
+            const input = document.getElementById("userNumbers").value.trim();
+            const userNumbers = input.split(" ").map(Number);
+
+            // Validate: 6 numbers, 5 white (1-69), 1 Powerball (1-26)
+            if (input === "" || userNumbers.length !== 6 || 
+                userNumbers.slice(0, 5).some(n => !Number.isInteger(n) || n < 1 || n > 69) ||
+                userNumbers[5] < 1 || userNumbers[5] > 26) {
+                document.getElementById("result").innerText = "Enter 5 numbers (1-69) + 1 Powerball (1-26), separated by spaces!";
+                return;
+            }
+
+            const whiteMatches = userNumbers.slice(0, 5).filter(num => winningNumbers.includes(num)).length;
+            const powerballMatch = userNumbers[5] === powerballNumber;
+
+            let resultText = `You matched ${whiteMatches} white balls`;
+            if (powerballMatch) resultText += " + Powerball!";
+            if (whiteMatches === 5 && powerballMatch) resultText = "JACKPOT! All 5 + Powerball!";
+            else if (whiteMatches < 3 && !powerballMatch) resultText += ". Better luck next time!";
+            document.getElementById("result").innerText = resultText;
+
+            document.getElementById("ad").innerText = "Ad: Buy more tickets at LottoMart!";
         }
-
-        const matches = userNumbers.filter(num => winningNumbers.includes(num)).length;
-        const bonusMatch = userNumbers.includes(bonusNumber);
-
-        let resultText = `You matched ${matches} numbers`;
-        if (matches === 6) resultText = "JACKPOT! All 6 numbers!";
-        else if (matches === 5 && bonusMatch) resultText += " + bonus!";
-        else if (matches < 3) resultText += ". Better luck next time!";
-        document.getElementById("result").innerText = resultText;
-
-        document.getElementById("ad").innerText = "Ad: Buy more tickets at LottoMart!";
-    }
-</script>
+    </script>
 </body>
 </html>
