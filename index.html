@@ -116,8 +116,8 @@
         <p>Enter 5 white balls (1-69) + 1 Powerball (1-26), separated by spaces:</p>
         <input type="text" id="userNumbers" placeholder="e.g., 7 18 22 50 65 15">
         <br>
-        <button onclick="checkNumbers()">Check My Numbers</button>
-        <div id="result">Results will show here</div>
+        <button onclick="checkNumbers()" id="checkButton" disabled>Check My Numbers</button>
+        <div id="result">Loading latest draw...</div>
         <div id="ad">Ad Space</div>
     </div>
 
@@ -125,7 +125,9 @@
         let winningNumbers = [3, 15, 27, 32, 41, 48]; // Fallback
         let powerballNumber = 7;
         let drawDate = "Unknown";
+        const checkButton = document.getElementById("checkButton");
 
+        // Fetch Powerball data and enable button when ready
         fetch('https://www.powerball.com/api/v1/numbers/powerball/recent10?_format=json')
             .then(response => response.json())
             .then(data => {
@@ -135,9 +137,13 @@
                 powerballNumber = numbers[5];
                 drawDate = latestDraw.field_draw_date.split('T')[0];
                 console.log(`Latest Powerball: ${winningNumbers} + ${powerballNumber} (Date: ${drawDate})`);
+                document.getElementById("result").innerText = "Results will show here";
+                checkButton.disabled = false; // Enable button once data loads
             })
             .catch(() => {
                 console.log("Fetch failed, using fallback numbers");
+                document.getElementById("result").innerText = "Results will show here (Fallback mode)";
+                checkButton.disabled = false;
             });
 
         function checkNumbers() {
