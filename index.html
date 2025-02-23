@@ -132,31 +132,37 @@
         let dataLoaded = false;
         const checkButton = document.getElementById("checkButton");
 
-        // Fetch Powerball data once
-        const loadPowerballData = fetch('https://www.powerball.com/api/v1/numbers/powerball/recent10?_format=json')
-            .then(response => response.json())
-            .then(data => {
+        // Fetch with retry and better error handling
+        async function fetchPowerballData() {
+            try {
+                const response = await fetch('https://www.powerball.com/api/v1/numbers/powerball/recent10?_format=json', {
+                    mode: 'cors'
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
                 const latestDraw = data[0];
                 const numbers = latestDraw.field_winning_numbers.split('-').map(Number);
                 winningNumbers = numbers.slice(0, 5);
                 powerballNumber = numbers[5];
                 drawDate = latestDraw.field_draw_date.split('T')[0];
-                console.log(`Latest Powerball: ${winningNumbers} + ${powerballNumber} (Date: ${drawDate})`);
+                console.log(`Fetched: ${winningNumbers} + ${powerballNumber} (Date: ${drawDate})`);
                 dataLoaded = true;
-                document.getElementById("result").innerText = "Results will show here";
+                document.getElementById("result").innerText = `Latest draw: ${winningNumbers.join('-')} + ${powerballNumber} (${drawDate})`;
                 checkButton.disabled = false;
-            })
-            .catch(() => {
-                console.log("Fetch failed, using fallback numbers");
-                dataLoaded = true; // Even if it fails, let it proceed with fallback
-                document.getElementById("result").innerText = "Results will show here (Fallback mode)";
+            } catch (error) {
+                console.error("Fetch failed:", error.message);
+                document.getElementById("result").innerText = "Failed to load draw, using fallback";
+                dataLoaded = true;
                 checkButton.disabled = false;
-            });
+            }
+        }
+
+        // Start the fetch
+        fetchPowerballData();
 
         async function checkNumbers() {
-            // Wait for the fetch to finish
             if (!dataLoaded) {
-                await loadPowerballData;
+                await fetchPowerballData();
             }
 
             const input = document.getElementById("userNumbers").value.trim();
