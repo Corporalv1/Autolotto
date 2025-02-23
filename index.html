@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autolotto - Powerball Elite</title>
+    <title>Autolotto - Powerball</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body {
@@ -28,7 +28,7 @@
         h1 {
             font-size: 2.8em;
             font-weight: 800;
-            color: #f1c40f;
+            color: #ecf0f1;
             margin-bottom: 10px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
@@ -42,7 +42,7 @@
             padding: 15px;
             width: 90%;
             max-width: 450px;
-            border: 2px solid #f1c40f;
+            border: 2px solid #ecf0f1;
             border-radius: 10px;
             font-size: 1.3em;
             background: rgba(255, 255, 255, 0.05);
@@ -51,8 +51,8 @@
             transition: all 0.3s ease;
         }
         input:focus {
-            border-color: #f39c12;
-            box-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+            border-color: #16a085;
+            box-shadow: 0 0 10px rgba(22, 160, 133, 0.5);
         }
         input::placeholder {
             color: #95a5a6;
@@ -60,8 +60,8 @@
         button {
             padding: 15px 40px;
             margin-top: 20px;
-            background: #f1c40f;
-            color: #1e2a44;
+            background: #16a085;
+            color: #ecf0f1;
             border: none;
             border-radius: 10px;
             font-size: 1.3em;
@@ -71,12 +71,16 @@
             transition: all 0.3s ease;
             animation: pulse 2s infinite;
         }
-        button:hover {
-            background: #f39c12;
+        button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background: #138d75;
             transform: translateY(-3px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
-        button:active {
+        button:active:not(:disabled) {
             transform: translateY(0);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -84,7 +88,7 @@
             margin-top: 30px;
             font-size: 1.6em;
             font-weight: 600;
-            color: #2ecc71;
+            color: #16a085;
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 10px;
@@ -112,7 +116,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Autolotto - Powerball Elite</h1>
+        <h1>Autolotto - Powerball</h1>
         <p>Enter 5 white balls (1-69) + 1 Powerball (1-26), separated by spaces:</p>
         <input type="text" id="userNumbers" placeholder="e.g., 7 18 22 50 65 15">
         <br>
@@ -127,7 +131,6 @@
         let drawDate = "Unknown";
         const checkButton = document.getElementById("checkButton");
 
-        // Fetch Powerball data and enable button when ready
         fetch('https://www.powerball.com/api/v1/numbers/powerball/recent10?_format=json')
             .then(response => response.json())
             .then(data => {
@@ -138,7 +141,7 @@
                 drawDate = latestDraw.field_draw_date.split('T')[0];
                 console.log(`Latest Powerball: ${winningNumbers} + ${powerballNumber} (Date: ${drawDate})`);
                 document.getElementById("result").innerText = "Results will show here";
-                checkButton.disabled = false; // Enable button once data loads
+                checkButton.disabled = false;
             })
             .catch(() => {
                 console.log("Fetch failed, using fallback numbers");
@@ -174,7 +177,7 @@
         function showResult() {
             const result = document.getElementById("result");
             result.classList.remove("show");
-            void result.offsetWidth; // Trigger reflow
+            void result.offsetWidth;
             result.classList.add("show");
         }
     </script>
